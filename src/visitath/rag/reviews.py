@@ -42,7 +42,9 @@ def clean_reviews(
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date", ascending=False)
+    df = df.drop_duplicates(subset="id")
     df = df.groupby("listing_id").head(max_per_listing)
+    
     return df.rename(columns={"id": "review_id"})[
         ["review_id", "listing_id", "date", "comments"]
     ].reset_index(drop=True)
