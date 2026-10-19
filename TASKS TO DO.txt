@@ -1,0 +1,75 @@
+TASKS TO DO 
+Φάση 1: Στήσιμο 
+
+Repo στο GitHub, clone, virtual environment, δομή φακέλων
+Εργαλεία: Git, GitHub, VS Code, venv
+Που μένει: requirements.txt, εγκατάσταση βιβλιοθηκών, πρώτο commit
+
+Φάση 2: Δεδομένα
+
+Κατέβασμα listings.csv.gz και reviews.csv.gz της Αθήνας από το Inside Airbnb
+Εξερεύνηση σε notebook: κενά, κατανομή τιμών, γειτονιές, outliers
+Καθάρισμα (π.χ. η τιμή έρχεται ως κείμενο με $), αποθήκευση σε data/processed/
+Εργαλεία: pandas, numpy, matplotlib/seaborn, Jupyter
+
+Φάση 3: Μοντέλο τιμών (ML)
+
+Feature engineering: περιοχή, μέγεθος, υπνοδωμάτια, ανέσεις, βαθμολογίες, συντεταγμένες, απόσταση από κέντρο/μετρό
+Baseline (γραμμική παλινδρόμηση) και μετά gradient boosting
+Σωστός διαχωρισμός train/test και cross-validation
+Υπολογισμός value score: πόσο κάτω από την "δίκαιη" τιμή είναι η πραγματική
+Εργαλεία: scikit-learn, LightGBM, MLflow (προαιρετικά, για tracking πειραμάτων)
+
+Φάση 4: RAG πάνω στις κριτικές
+
+Καθάρισμα κριτικών, φιλτράρισμα γλώσσας (πολλές είναι σε άλλες γλώσσες)
+Embeddings, αποθήκευση σε vector store, retrieval ανά αγγελία
+Δοκιμή παραλλαγών (μέγεθος chunks, μοντέλο embeddings, hybrid search με BM25)
+Εργαλεία: sentence-transformers (πολυγλωσσικό μοντέλο), ChromaDB, rank-bm25
+
+Φάση 5: LLM layer
+
+Εγκατάσταση Ollama και μοντέλου (llama3.1:8b ή μικρότερο)
+Parsing του αιτήματος σε φίλτρα (JSON: περιοχή, άτομα, budget) με επικύρωση
+Παραγωγή εξήγησης με παραπομπές στις κριτικές
+Χειρισμός σφαλμάτων (άκυρο JSON, κενά αποτελέσματα, "δεν ξέρω")
+Εργαλεία: Ollama, ollama Python library, Pydantic
+
+Φάση 6: Συναρμολόγηση (recommendation pipeline)
+
+Ενώνουμε: φίλτρα → αναζήτηση στη βάση → value score → RAG → εξήγηση → 2-3 προτάσεις
+Εργαλεία: καθαρή Python, χωρισμένη σε modules
+
+Φάση 7: API και απλό UI
+
+Endpoints /recommend και /health, επικύρωση εισόδου
+Μια απλή σελίδα συνομιλίας (προαιρετικά)
+Εργαλεία: FastAPI, Uvicorn, Pydantic. Για το UI: Streamlit ή Gradio (πιο γρήγορα) ή HTML/JavaScript
+
+Φάση 8: Αξιολόγηση
+
+Μοντέλο τιμών: MAE, RMSE, R² σε test set
+Retrieval: ποσοστό που το σωστό απόσπασμα είναι στα top 5
+LLM parsing: ποσοστό σωστών φίλτρων σε 30-50 δοκιμαστικά αιτήματα
+Συνολικά: ποιότητα προτάσεων και έλεγχος για "παραισθήσεις"
+Εργαλεία: pytest, pandas, δικά σου scripts στον φάκελο evaluation/
+
+Φάση 9: Engineering
+
+Unit tests, linting (ruff)
+Dockerfile
+CI με GitHub Actions (τρέχει tests σε κάθε push)
+Εργαλεία: pytest, ruff, Docker, GitHub Actions
+
+Φάση 10: Deployment και monitoring
+
+Deploy σε Hugging Face Spaces, Render ή Fly.io (έλεγξε τους τρέχοντες όρους)
+Καταγραφή latency, σφαλμάτων, αιτημάτων, rate limit
+Για το δημόσιο demo: αλλαγή του LLM σε API ή ελαφρύτερη λύση, γιατί το Ollama τρέχει τοπικά
+Εργαλεία: logging της Python, Docker, πάροχος cloud
+
+Φάση 11: README και παρουσίαση
+
+Περιγραφή, διάγραμμα αρχιτεκτονικής, πίνακας αποτελεσμάτων, οδηγίες εκτέλεσης
+Ενότητα "τι πήγε στραβά και τι θα βελτίωνα", ξεκάθαροι περιορισμοί (βραχυχρόνιες μισθώσεις, snapshot)
+Σύντομο βίντεο ή GIF demo
