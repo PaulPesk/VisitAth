@@ -225,3 +225,4 @@ mlruns/
 .env
 evaluation/retrieval_to_label.csv
 evaluation/listing_to_label.csv
+evaluation 
