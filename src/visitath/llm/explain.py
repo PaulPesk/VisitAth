@@ -4,7 +4,7 @@ import json
 
 from visitath.llm.client import ask
 
-MAX_DISTANCE = 0.75  # reviews farther than this are treated as irrelevant (to be validated)
+MAX_DISTANCE = 0.85 # reviews farther than this are treated as irrelevant (to be validated)
 
 SYSTEM = """You summarise guest reviews for an Athens apartment finder.
 The guest cares about: {wishes}
