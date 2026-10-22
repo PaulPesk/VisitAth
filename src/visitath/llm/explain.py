@@ -3,8 +3,9 @@
 import json
 
 from visitath.llm.client import ask
+from visitath.llm.topics import quote_matches_topic
 
-MAX_DISTANCE = 0.85 # reviews farther than this are treated as irrelevant (to be validated)
+MAX_DISTANCE = 0.85  # coarse safeguard only; quotes are verified in code
 
 SYSTEM = """You summarise guest reviews for an Athens apartment finder.
 The guest cares about: {wishes}
@@ -15,8 +16,9 @@ Rules:
 - If no review is relevant, reply {{"claims": []}}. Do not guess."""
 
 
-def verified_claims(reviews: list[str], wishes: str) -> list[dict]:
-    """Ask the LLM for quotes, keep only those that really appear in the cited review."""
+def verified_claims(reviews: list[str], wishes: str, topic: str | None = None) -> list[dict]:
+    """Ask the LLM for quotes; keep only those that really appear in the
+    cited review AND are about the requested topic."""
     if not reviews:
         return []
     numbered = "\n".join(f"[{i}] {r}" for i, r in enumerate(reviews, start=1))
@@ -31,7 +33,12 @@ def verified_claims(reviews: list[str], wishes: str) -> list[dict]:
             n, quote = int(c["review"]), str(c["quote"]).strip().lower()
         except (KeyError, ValueError, TypeError):
             continue
-        if 1 <= n <= len(reviews) and quote and quote in reviews[n - 1].lower():
+        if (
+            1 <= n <= len(reviews)
+            and quote
+            and quote in reviews[n - 1].lower()
+            and quote_matches_topic(quote, topic)
+        ):
             ok.append({"review": n, "quote": c["quote"], "stance": c.get("stance", "")})
     return ok
 
@@ -46,10 +53,10 @@ def price_verdict(price: float, fair_price: float) -> str:
     return f"close to the estimated fair price (${fair_price:.0f})"
 
 
-def explain(listing: dict, hits: list[dict], wishes: str) -> dict:
+def explain(listing: dict, hits: list[dict], wishes: str, topic: str | None = None) -> dict:
     """hits: results of search_reviews (dicts with 'text' and 'distance')."""
     close = [h for h in hits if h["distance"] <= MAX_DISTANCE]
-    claims = verified_claims([h["text"] for h in close], wishes)
+    claims = verified_claims([h["text"] for h in close], wishes, topic)
     return {
         "price": price_verdict(listing["price"], listing["fair_price"]),
         "claims": claims,
