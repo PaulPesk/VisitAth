@@ -116,7 +116,7 @@ Python 3.14, Windows, with an NVIDIA GPU (the 8B model fits in GPU memory,
 but it also runs on CPU, only slower).
 
 ```bash
-git clone https://github.com/<your-username>/VisitAth.git
+git clone https://github.com/PaulPesk/VisitAth.git
 cd VisitAth
 python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
