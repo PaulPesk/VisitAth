@@ -72,7 +72,7 @@ def recommend(text: str, top_n: int = 3) -> list[dict]:
 
         results.append(
             {
-                "id": int(r["id"]),
+                "id": str(int(r["id"])),
                 "name": r["name"],
                 "neighbourhood": r["neighbourhood_cleansed"],
                 "price_per_night": float(r["price_num"]),
