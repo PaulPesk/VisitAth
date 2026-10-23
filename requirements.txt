@@ -9,3 +9,11 @@ ipykernel
 pytest
 ruff
 python-dotenv
+langdetect
+sentence-transformers
+chromadb
+ollama
+pydantic
+fastapi
+uvicorn
+httpx
