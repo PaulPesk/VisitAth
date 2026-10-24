@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 from visitath.data.features import haversine_km, parse_amenities, parse_baths
 

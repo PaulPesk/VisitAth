@@ -1,6 +1,6 @@
 import pandas as pd
 
-from visitath.pricing.model import build_matrix, NUMERIC_FEATURES, CATEGORICAL_FEATURES
+from visitath.pricing.model import CATEGORICAL_FEATURES, NUMERIC_FEATURES, build_matrix
 
 
 def test_build_matrix_has_expected_columns_and_categories():

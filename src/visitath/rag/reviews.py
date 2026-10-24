@@ -1,5 +1,6 @@
 """Loading and cleaning of guest reviews."""
 from langdetect import DetectorFactory, detect
+from langdetect.lang_detect_exception import LangDetectException
 
 DetectorFactory.seed = 0  # επαναλήψιμα αποτελέσματα
 import re
@@ -51,7 +52,7 @@ def clean_reviews(
 def detect_lang(text: str) -> str:
     try:
         return detect(text)
-    except Exception:
+    except LangDetectException:
         return "unk"
 
 

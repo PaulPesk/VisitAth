@@ -16,17 +16,17 @@ NUMERIC_FEATURES = [
 ]
 CATEGORICAL_FEATURES = ["room_type", "neighbourhood_cleansed"]
 
-LGB_PARAMS = dict(
-    n_estimators=2000,
-    learning_rate=0.03,
-    num_leaves=31,
-    min_child_samples=20,
-    subsample=0.8,
-    subsample_freq=1,
-    colsample_bytree=0.8,
-    random_state=42,
-    verbose=-1,
-)
+LGB_PARAMS = {
+    "n_estimators": 2000,
+    "learning_rate": 0.03,
+    "num_leaves": 31,
+    "min_child_samples": 20,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.8,
+    "random_state": 42,
+    "verbose": -1,
+}
 
 
 def build_matrix(df: pd.DataFrame) -> pd.DataFrame:

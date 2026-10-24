@@ -4,9 +4,10 @@ import json
 
 from pydantic import BaseModel, Field, ValidationError
 
+from visitath.llm.aliases import resolve_alias
 from visitath.llm.client import ask
 from visitath.llm.topics import TOPICS
-from visitath.llm.aliases import resolve_alias
+
 
 class Filters(BaseModel):
     guests: int | None = Field(default=None, ge=1, le=16)
