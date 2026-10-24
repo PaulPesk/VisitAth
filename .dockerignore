@@ -1,0 +1,11 @@
+.venv/
+.venv-test/
+.git/
+data/
+chroma_db/
+mlruns/
+notebooks/
+evaluation/*.csv
+__pycache__/
+*.pyc
+.env
