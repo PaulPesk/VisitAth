@@ -88,6 +88,7 @@ def recommend(text: str, top_n: int = 3) -> list[dict]:
                 "price_verdict": out["price"],
                 "claims": out["claims"],
                 "note": out["note"],
+                "fair_price": float(r["fair_price"]),
             }
         )
 

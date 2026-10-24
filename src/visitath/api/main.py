@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from visitath.recommend import recommend
@@ -11,6 +12,7 @@ from visitath.recommend import recommend
 STATIC = Path(__file__).parent / "static"
 
 app = FastAPI(title="VisitAth", version="0.1.0")
+app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
 class RecommendRequest(BaseModel):

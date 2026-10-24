@@ -20,8 +20,12 @@ def test_recommend_rejects_too_long_text():
     r = client.post("/recommend", json={"text": "x" * 301})
     assert r.status_code == 422
 
-    
+
 def test_index_page_is_served():
     r = client.get("/")
     assert r.status_code == 200
     assert "VisitAth" in r.text    
+def test_script_is_served():
+    r = client.get("/static/app.js")
+    assert r.status_code == 200
+    assert "/recommend" in r.text

@@ -4,48 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VisitAth</title>
-  <style>
-    :root { --bg:#fafafa; --fg:#1a1a1a; --card:#fff; --muted:#666; --line:#ddd; --accent:#1a5fb4; --good:#1b7a3d; --bad:#b3261e; }
-    @media (prefers-color-scheme: dark) {
-      :root { --bg:#16181b; --fg:#eee; --card:#202429; --muted:#9aa0a6; --line:#33383e; --accent:#6ea8fe; --good:#5fd38d; --bad:#ff8a80; }
-    }
-    body { font-family: system-ui, sans-serif; background:var(--bg); color:var(--fg); margin:0; }
-    main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
-    h1 { margin: 0 0 4px; }
-    .sub { color:var(--muted); margin:0 0 20px; }
-    form { display:flex; gap:8px; }
-    input { flex:1; padding:10px 12px; font-size:16px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--fg); }
-    button { padding:10px 18px; font-size:16px; border:0; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; }
-    button:disabled { opacity:.6; cursor:wait; }
-    #status { margin:16px 0; color:var(--muted); }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:12px 0; }
-    .card h2 { font-size:18px; margin:0 0 2px; }
-    .meta { color:var(--muted); font-size:14px; }
-    .price { font-weight:600; margin:8px 0; }
-    .claim { margin:6px 0; padding-left:10px; border-left:3px solid var(--line); }
-    .claim.positive { border-color:var(--good); }
-    .claim.negative { border-color:var(--bad); }
-    .note { color:var(--muted); font-style:italic; }
-    footer { margin-top:32px; font-size:13px; color:var(--muted); }
-  </style>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <main>
   <h1>VisitAth</h1>
-  <p class="sub">Value-for-money Airbnb stays in Athens. Describe what you want, in English or Greek.</p>
+  <p class="lede">Find short-term stays in Athens that cost less than they should.
+    Describe what you want, in English or Greek.</p>
 
   <form id="form">
-    <input id="q" maxlength="300" required minlength="3"
-           placeholder="e.g. quiet apartment for 2 in Koukaki under 120">
-    <button id="go" type="submit">Search</button>
+    <input id="q" maxlength="300" minlength="3" required
+           aria-label="What are you looking for?"
+           placeholder="Quiet apartment for 2 in Koukaki under 120">
+    <button id="go" type="submit">Find stays</button>
   </form>
+  <div class="examples" id="examples"></div>
 
-  <div id="status"></div>
+  <div id="status" role="status" aria-live="polite"></div>
   <div id="results"></div>
 
   <footer>
-    Short-term rentals, Inside Airbnb snapshot of 22 Sep 2026. Prices are indicative.
-    The "fair price" is a model estimate, not a guarantee of a deal.
+    Short-term rentals from the Inside Airbnb snapshot of 22 September 2026, so prices
+    and availability may have changed. The fair price is a model estimate: it can be
+    wrong, and a low price is not a guarantee of a good stay.
   </footer>
 </main>
 
@@ -56,37 +37,80 @@
   const statusEl = document.getElementById("status");
   const resultsEl = document.getElementById("results");
 
+  const EXAMPLES = [
+    "Quiet apartment for 2 in Koukaki under 120",
+    "Clean studio in Exarchia up to 80",
+    "σπίτι για 3 άτομα στο Κολονάκι, μέχρι 150",
+  ];
+
+  // Always textContent: names and quotes come from third parties, never HTML.
   function el(tag, text, className) {
     const node = document.createElement(tag);
-    if (text !== undefined) node.textContent = text;   // textContent: never HTML
+    if (text !== undefined) node.textContent = text;
     if (className) node.className = className;
     return node;
   }
 
+  function priceBlock(r) {
+    const wrap = el("div", undefined, "price");
+    const line = el("div", undefined, "price-line");
+    line.appendChild(el("strong", "$" + r.price_per_night.toFixed(0) + " per night"));
+    line.appendChild(el("span", r.price_verdict));
+    wrap.appendChild(line);
+
+    if (typeof r.fair_price === "number") {
+      const max = Math.max(r.price_per_night, r.fair_price) * 1.12;
+      const track = el("div", undefined, "track");
+      const fill = el("div", undefined, "fill");
+      const tick = el("div", undefined, "tick");
+      tick.style.left = (r.fair_price / max * 100) + "%";
+      tick.title = "Estimated fair price";
+      track.append(fill, tick);
+      wrap.appendChild(track);
+
+      const scale = el("div", undefined, "scale");
+      scale.appendChild(el("span", "Listed price"));
+      scale.appendChild(el("span", "Fair price $" + r.fair_price.toFixed(0)));
+      wrap.appendChild(scale);
+
+      // animate the bar once it is in the page
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        fill.style.width = (r.price_per_night / max * 100) + "%";
+      }));
+    }
+    return wrap;
+  }
+
   function renderCard(r) {
-    const card = el("div", undefined, "card");
+    const diff = typeof r.fair_price === "number"
+      ? (r.price_per_night - r.fair_price) / r.fair_price : 0;
+    const tone = diff <= -0.1 ? "below" : diff >= 0.1 ? "above" : "";
+    const card = el("article", undefined, "card " + tone);
+
     card.appendChild(el("h2", r.name));
     card.appendChild(el("div", r.neighbourhood, "meta"));
-    card.appendChild(el("div", "$" + r.price_per_night.toFixed(0) + " per night, " + r.price_verdict, "price"));
+    card.appendChild(priceBlock(r));
 
-    r.claims.forEach(c => {
-      const box = el("div", undefined, "claim " + (c.stance || ""));
-      box.appendChild(el("span", "\u201C" + c.quote + "\u201D"));
-      if (c.stance) box.appendChild(el("span", "  (" + c.stance + ")", "meta"));
-      card.appendChild(box);
-    });
-    if (r.note) card.appendChild(el("div", r.note, "note"));
+    if (r.claims.length) {
+      const list = el("ul", undefined, "claims");
+      r.claims.forEach(c => {
+        const item = el("li", undefined, c.stance || "");
+        item.appendChild(el("span", "\u201C" + c.quote + "\u201D"));
+        if (c.stance === "positive") item.appendChild(el("small", "Guest praise"));
+        if (c.stance === "negative") item.appendChild(el("small", "Guest complaint"));
+        list.appendChild(item);
+      });
+      card.appendChild(list);
+    }
+    if (r.note) card.appendChild(el("p", r.note, "note"));
     return card;
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const text = input.value.trim();
-    if (text.length < 3) return;
-
+  async function search(text) {
     button.disabled = true;
     resultsEl.replaceChildren();
-    statusEl.textContent = "Searching... this can take 10-30 seconds.";
+    statusEl.className = "busy";
+    statusEl.textContent = "Searching listings and reading reviews. This can take 10 to 30 seconds.";
 
     try {
       const res = await fetch("/recommend", {
@@ -94,20 +118,38 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
-      if (!res.ok) throw new Error("Server returned " + res.status);
+      if (!res.ok) throw new Error("the server returned " + res.status);
       const data = await res.json();
 
+      statusEl.className = "";
       if (data.results.length === 0) {
-        statusEl.textContent = "No listings matched. Try a higher budget, fewer guests or another neighbourhood.";
+        statusEl.textContent =
+          "No listings matched. Try a higher budget, fewer guests or a different neighbourhood.";
       } else {
-        statusEl.textContent = data.results.length + " recommendation(s):";
+        statusEl.textContent = data.results.length === 1
+          ? "1 stay found" : data.results.length + " stays found";
         data.results.forEach(r => resultsEl.appendChild(renderCard(r)));
       }
     } catch (err) {
-      statusEl.textContent = "Something went wrong: " + err.message;
+      statusEl.className = "";
+      statusEl.textContent = "The search failed: " + err.message + ". Check that the server and Ollama are running.";
     } finally {
       button.disabled = false;
     }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (text.length >= 3) search(text);
+  });
+
+  const examplesEl = document.getElementById("examples");
+  EXAMPLES.forEach(t => {
+    const b = el("button", t);
+    b.type = "button";
+    b.addEventListener("click", () => { input.value = t; search(t); });
+    examplesEl.appendChild(b);
   });
 </script>
 </body>
