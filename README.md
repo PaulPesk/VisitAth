@@ -162,7 +162,27 @@ Example response (shortened):
   "note": null
 }
 ```
+## Docker
 
+The image contains only the code and API dependencies. Data, the Chroma index
+and the LLM stay outside, because the data has its own license and the index
+and model are large.
+
+```bash
+docker build -t visitath .
+
+# Ollama must listen on all interfaces so the container can reach it
+# (PowerShell): $env:OLLAMA_HOST="0.0.0.0:11434"; ollama serve
+
+docker run --rm -p 8000:8000 \
+  -v "$PWD/data:/app/data" \
+  -v "$PWD/chroma_db:/app/chroma_db" \
+  visitath
+```
+
+The container reaches Ollama through `OLLAMA_HOST`
+(default `http://host.docker.internal:11434`). You still need the processed
+data, the Chroma index and a running Ollama; the image is not self-contained.
 ## Tests
 
 ```bash
@@ -182,9 +202,9 @@ cleaning and API input validation. Evaluation scripts live in `evaluation/`
 - [x] Verified, review-grounded explanations
 - [x] FastAPI service with tests
 - [x] Re-rank by review sentiment for the requested topic
-- [ ] Better retrieval (sentence-level chunks, hybrid BM25 + vectors)
+- [x] Better retrieval (sentence-level chunks, hybrid BM25 + vectors)
 - [ ] Fix topic parser misses and add unseen test cases
-- [ ] Docker, CI (GitHub Actions), deployment, request logging and rate limiting
+- [x] Docker, CI (GitHub Actions), deployment, request logging and rate limiting
 - [ ] Multilingual reviews
 
 ## License
