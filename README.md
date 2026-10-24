@@ -83,9 +83,11 @@ and some labels were produced by an LLM, so treat them as indicative.
 - **Value-score band is a choice.** Top recommendations cluster right at the
   0.50 upper bound ("50% below fair price"), so I cannot tell whether they are
   all genuine deals or whether the listed price is unrepresentative.
-- **Ranking ignores review sentiment.** A request for a quiet place can return
-  a listing first whose reviews say it is noisy. The system shows those quotes
-  as negative, but does not re-rank yet.
+- **Review-aware ranking is shallow.** When a topic is requested, the top 10
+  candidates are re-ordered: listings with a positive quote first, then silent
+  ones, then those with only negative quotes. The stance label comes from the
+  LLM and is not verified. Checked on a single request. Response time grows
+  because up to 10 listings are explained per request.
 - **One topic per request**, English reviews only, and a keyword-based topic
   filter (for example "sleep" or "hot" can match loosely).
 - Listing names can be in any script (some are Chinese).
@@ -179,7 +181,7 @@ cleaning and API input validation. Evaluation scripts live in `evaluation/`
 - [x] LLM request parser with validation
 - [x] Verified, review-grounded explanations
 - [x] FastAPI service with tests
-- [ ] Re-rank by review sentiment for the requested topic
+- [x] Re-rank by review sentiment for the requested topic
 - [ ] Better retrieval (sentence-level chunks, hybrid BM25 + vectors)
 - [ ] Fix topic parser misses and add unseen test cases
 - [ ] Docker, CI (GitHub Actions), deployment, request logging and rate limiting

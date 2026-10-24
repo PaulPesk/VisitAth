@@ -9,7 +9,7 @@ from visitath.llm.parse import parse_request
 from visitath.rag.retrieve import search_reviews
 
 LISTINGS = Path("data/processed/listings_scored.csv")
-
+CANDIDATES = 10  # how many listings to check when a topic is requested
 MIN_RATING = 4.5
 MIN_REVIEWS = 10
 MIN_VALUE, MAX_VALUE = 0.10, 0.50  # same quality band used in the notebook
@@ -51,6 +51,15 @@ def filter_and_rank(df: pd.DataFrame, filters, top_n: int = 3) -> pd.DataFrame:
     return out.sort_values("value_score", ascending=False).head(top_n)
 
 
+def review_group(claims: list[dict]) -> int:
+    """0 = has a positive quote, 1 = nothing found, 2 = only negative quotes."""
+    if any(c.get("stance") == "positive" for c in claims):
+        return 0
+    if claims:
+        return 2
+    return 1
+
+
 def recommend(text: str, top_n: int = 3) -> list[dict]:
     df = load_listings()
     hoods = sorted(df["neighbourhood_cleansed"].unique())
@@ -59,11 +68,11 @@ def recommend(text: str, top_n: int = 3) -> list[dict]:
         return []
 
     label = TOPIC_LABELS.get(filters.topic)
+    n_fetch = CANDIDATES if filters.topic else top_n
     results = []
-    for _, r in filter_and_rank(df, filters, top_n).iterrows():
+    for _, r in filter_and_rank(df, filters, n_fetch).iterrows():
         listing = {"price": r["price_num"], "fair_price": r["fair_price"]}
         if filters.topic is None:
-            # nothing specific to verify in the reviews
             out = explain(listing, [], "", topic=None)
             out["note"] = None
         else:
@@ -81,4 +90,8 @@ def recommend(text: str, top_n: int = 3) -> list[dict]:
                 "note": out["note"],
             }
         )
-    return results
+
+    if filters.topic:
+        # stable sort: keeps value-score order inside each group
+        results.sort(key=lambda x: review_group(x["claims"]))
+    return results[:top_n]
