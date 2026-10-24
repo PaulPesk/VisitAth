@@ -6,10 +6,7 @@ Users describe what they want in plain English or Greek (for example
 recommendations, each with a price verdict computed in code and guest-review
 quotes that are verified against the source text.
 
-> **Status:** work in progress. The core pipeline and API work end to end.
-> Review-aware ranking, Docker, CI and deployment are not done yet (see the
-> [Roadmap](#roadmap)).
-
+![CI](https://github.com/PaulPesk/VisitAth/actions/workflows/ci.yml/badge.svg)
 ## How it works
 
 ```
