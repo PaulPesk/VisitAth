@@ -1,15 +1,25 @@
-"""HTTP API: /health and /recommend."""
+"""HTTP API: /health, /recommend and a minimal web page at /."""
+
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from visitath.recommend import recommend
+
+STATIC = Path(__file__).parent / "static"
 
 app = FastAPI(title="VisitAth", version="0.1.0")
 
 
 class RecommendRequest(BaseModel):
     text: str = Field(min_length=3, max_length=300)
+
+
+@app.get("/", include_in_schema=False)
+def index() -> FileResponse:
+    return FileResponse(STATIC / "index.html")
 
 
 @app.get("/health")
