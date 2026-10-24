@@ -67,3 +67,9 @@ footer { margin-top:40px; max-width:62ch; font-size:.85rem; color:var(--muted); 
   .fill { transition:none; }
   #status.busy::before { animation:none; }
 }
+.claims details { margin-top:6px; }
+.claims summary { cursor:pointer; color:var(--sea); font-size:.9rem; }
+.source { margin:6px 0 0; padding:10px 12px; background:var(--bg); border-radius:4px;
+          font-size:.92rem; max-width:62ch; overflow-wrap:anywhere; }
+.source mark { background:color-mix(in srgb, var(--good) 30%, transparent);
+               color:inherit; padding:0 2px; border-radius:2px; }

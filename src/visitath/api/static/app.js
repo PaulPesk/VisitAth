@@ -48,6 +48,23 @@ function priceBlock(r) {
   return wrap;
 }
 
+function sourceReview(c) {
+  const details = el("details");
+  details.appendChild(el("summary", "Show the full review"));
+  const box = el("p", undefined, "source");
+  const text = c.review_text;
+  const i = text.toLowerCase().indexOf(c.quote.toLowerCase());
+  if (i >= 0) {
+    box.appendChild(document.createTextNode(text.slice(0, i)));
+    box.appendChild(el("mark", text.slice(i, i + c.quote.length)));
+    box.appendChild(document.createTextNode(text.slice(i + c.quote.length)));
+  } else {
+    box.textContent = text;
+  }
+  details.appendChild(box);
+  return details;
+}
+
 function renderCard(r) {
   const diff = typeof r.fair_price === "number"
     ? (r.price_per_night - r.fair_price) / r.fair_price : 0;
@@ -65,6 +82,7 @@ function renderCard(r) {
       item.appendChild(el("span", "\u201C" + c.quote + "\u201D"));
       if (c.stance === "positive") item.appendChild(el("small", "Guest praise"));
       if (c.stance === "negative") item.appendChild(el("small", "Guest complaint"));
+      if (c.review_text) item.appendChild(sourceReview(c));
       list.appendChild(item);
     });
     card.appendChild(list);

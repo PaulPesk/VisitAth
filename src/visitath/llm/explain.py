@@ -54,9 +54,13 @@ def price_verdict(price: float, fair_price: float) -> str:
 
 
 def explain(listing: dict, hits: list[dict], wishes: str, topic: str | None = None) -> dict:
-    """hits: results of search_reviews (dicts with 'text' and 'distance')."""
+    """hits: results of search_reviews (dicts with 'review_id', 'text', 'distance')."""
     close = [h for h in hits if h["distance"] <= MAX_DISTANCE]
     claims = verified_claims([h["text"] for h in close], wishes, topic)
+    for c in claims:
+        source = close[c["review"] - 1]  # same list the LLM saw, so the index matches
+        c["review_id"] = str(source["review_id"])
+        c["review_text"] = source["text"]
     return {
         "price": price_verdict(listing["price"], listing["fair_price"]),
         "claims": claims,

@@ -189,7 +189,7 @@ data, the Chroma index and a running Ollama; the image is not self-contained.
 python -m pytest -v
 ```
 
-11 tests cover cleaning, feature parsing, the model feature matrix, review
+16 tests cover cleaning, feature parsing, the model feature matrix, review
 cleaning and API input validation. Evaluation scripts live in `evaluation/`
 (for example `python -m evaluation.parse_eval`) and need Ollama running.
 
