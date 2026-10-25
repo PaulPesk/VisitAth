@@ -1,11 +1,13 @@
 """HTTP API: /health, /recommend and a minimal web page at /."""
 
+from contextlib import asynccontextmanager
 from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from contextlib import asynccontextmanager
+
 from visitath.rag.retrieve import warm_up
 from visitath.recommend import recommend
 
