@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from visitath.llm.aliases import resolve_alias
 from visitath.llm.client import ask
-from visitath.llm.topics import TOPICS
+from visitath.llm.topics import TOPICS, resolve_topic
 
 
 class Filters(BaseModel):
@@ -49,4 +49,6 @@ def parse_request(text: str, neighbourhoods: list[str]) -> Filters | None:
     alias = resolve_alias(text)
     if alias in neighbourhoods:
         filters.neighbourhood = alias
+    if filters.topic is None:
+        filters.topic = resolve_topic(text)
     return filters

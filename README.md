@@ -70,7 +70,7 @@ and some labels were produced by an LLM, so treat them as indicative.
 | Retrieval over the whole review base | precision@5 ~ 1.0 (10 questions) | Easy test: thousands of near-identical reviews exist. Relevance judged by an LLM |
 | Retrieval inside a single listing | precision@3 = 0.43 (6 listings x 5 topics, 90 judgements) | LLM-labelled, small sample. Low because top-3 is always returned, even when a listing has nothing relevant |
 | Filter parser | 16/18 before a prompt fix, 18/18 after | The second number is optimistic: the fix targeted those exact cases |
-| Topic parser | 8/10 | Misses "ήσυχο" (Greek for quiet) and "close to the metro"; no invented topics |
+| Topic parser | 9/10 on two sets before a rule-based fallback; 10/10 and 10/10 after it (optimistic: the fallback was written after seeing those failures); 7/8 on a third set written afterwards | Greek requests were the weak spot. Mixed requests such as "close to the metro and quiet" return one topic only |
 | Verified explanation | Claims found in 20/20 cases where a relevant review existed in the top 3 | 30 cases, 6 listings. 4 extra claims appeared where labels said "none"; I checked them by hand and all four were correct (the relevant review was ranked 4th or 5th). LLM output is not fully deterministic |
 
 ## Limitations
