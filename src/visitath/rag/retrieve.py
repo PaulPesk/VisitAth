@@ -1,20 +1,30 @@
 """Retrieve guest reviews relevant to a question."""
 
+import threading
+
 import chromadb
 from sentence_transformers import SentenceTransformer
 
 from visitath.rag.index import COLLECTION, DB_PATH, MODEL_NAME
 
-_model = None
-_collection = None
+_lock = threading.Lock()
+_state = None  # (model, collection); set only when BOTH loaded successfully
 
 
 def _load():
-    global _model, _collection
-    if _model is None:
-        _model = SentenceTransformer(MODEL_NAME)
-        _collection = chromadb.PersistentClient(path=DB_PATH).get_collection(COLLECTION)
-    return _model, _collection
+    global _state
+    if _state is None:
+        with _lock:
+            if _state is None:  # another thread may have finished while we waited
+                model = SentenceTransformer(MODEL_NAME)
+                collection = chromadb.PersistentClient(path=DB_PATH).get_collection(COLLECTION)
+                _state = (model, collection)
+    return _state
+
+
+def warm_up() -> None:
+    """Load the embedding model and open the index once, before serving requests."""
+    _load()
 
 
 def search_reviews(query: str, listing_id: int | None = None, k: int = 5) -> list[dict]:

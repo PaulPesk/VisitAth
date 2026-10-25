@@ -91,7 +91,11 @@ function renderCard(r) {
   return card;
 }
 
+let busy = false;
+
 async function search(text) {
+  if (busy) return;
+  busy = true;
   button.disabled = true;
   resultsEl.replaceChildren();
   statusEl.className = "busy";
@@ -103,6 +107,7 @@ async function search(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     });
+    if (res.status === 429) throw new Error("another search is still running, try again in a few seconds");
     if (!res.ok) throw new Error("the server returned " + res.status);
     const data = await res.json();
 
@@ -119,6 +124,7 @@ async function search(text) {
     statusEl.className = "";
     statusEl.textContent = "The search failed: " + err.message + ". Check that the server and Ollama are running.";
   } finally {
+    busy = false;
     button.disabled = false;
   }
 }
