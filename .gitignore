@@ -225,4 +225,6 @@ mlruns/
 .env
 evaluation/retrieval_to_label.csv
 evaluation/listing_to_label.csv
-evaluation/ 
+TASKS TO DO.txt
+listing_to_label.csv
+retrieval_to_label.csv

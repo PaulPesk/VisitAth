@@ -189,7 +189,7 @@ data, the Chroma index and a running Ollama; the image is not self-contained.
 python -m pytest -v
 ```
 
-16 tests cover cleaning, feature parsing, the model feature matrix, review
+22 tests cover cleaning, feature parsing, the model feature matrix, review
 cleaning and API input validation. Evaluation scripts live in `evaluation/`
 (for example `python -m evaluation.parse_eval`) and need Ollama running.
 
@@ -202,10 +202,9 @@ cleaning and API input validation. Evaluation scripts live in `evaluation/`
 - [x] Verified, review-grounded explanations
 - [x] FastAPI service with tests
 - [x] Re-rank by review sentiment for the requested topic
-- [x] Better retrieval (sentence-level chunks, hybrid BM25 + vectors)
-- [ ] Fix topic parser misses and add unseen test cases
-- [x] Docker, CI (GitHub Actions), deployment, request logging and rate limiting
-- [ ] Multilingual reviews
+- [x] Fix topic parser misses and add unseen test cases
+- [x] Docker, CI (GitHub Actions), deployment
+- [x] Multilingual reviews
 
 ## License
 

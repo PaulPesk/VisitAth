@@ -8,6 +8,8 @@ import pandas as pd
 
 from evaluation.retrieval_queries import QUERIES
 
+# Judged labels, not ground truth: they come from a single judge (an LLM), so treat
+# the scores they produce as indicative.
 LABELS = {
     6830986:             ["010", "100", "000", "000", "000"],
     1509384820447416630: ["000", "111", "100", "111", "000"],

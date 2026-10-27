@@ -1,0 +1,20 @@
+CASES = [
+    ("σπίτι για 2 άτομα κοντά στην Ακρόπολη, μέχρι 100 δολάρια", 2, "ΑΚΡΟΠΟΛΗ", 100),
+    ("apartment for 4 people in Koukaki under 150", 4, "ΚΟΥΚΑΚΙ-ΜΑΚΡΥΓΙΑΝΝΗ", 150),
+    ("place in Kolonaki for 3, max 200 a night", 3, "ΚΟΛΩΝΑΚΙ", 200),
+    ("κάτι φθηνό στην Πλάκα για ζευγάρι", 2, "ΕΜΠΟΡΙΚΟ ΤΡΙΓΩΝΟ-ΠΛΑΚΑ", None),
+    ("I need a flat for 5 people", 5, None, None),
+    ("κάτι στο Πεδίον του Άρεως", None, "ΠΕΔΙΟ ΑΡΕΩΣ", None),
+    ("studio in Exarchia up to 80", None, "ΜΟΥΣΕΙΟ-ΕΞΑΡΧΕΙΑ-ΝΕΑΠΟΛΗ", 80),
+    ("2 adults and 2 kids, Thissio, budget 180", 4, "ΘΗΣΕΙΟ", 180),
+    ("anything in Athens", None, None, None),
+    ("δωμάτιο στα Πετράλωνα μέχρι 60 ευρώ", None, "ΠΕΤΡΑΛΩΝΑ", 60),
+    ("κάτι στη Βουλιαγμένη για 2", 2, None, None),
+    ("flat in Kolonaky for two people", 2, "ΚΟΛΩΝΑΚΙ", None),
+    ("τρία άτομα στο Κολονάκι, μέχρι 150", 3, "ΚΟΛΩΝΑΚΙ", 150),
+    ("200 total for 3 nights, 2 people, Plaka", 2, "ΕΜΠΟΡΙΚΟ ΤΡΙΓΩΝΟ-ΠΛΑΚΑ", None),
+    ("under 90 euros per night near the Acropolis", None, "ΑΚΡΟΠΟΛΗ", 90),
+    ("cheap but luxurious place in Athens", None, None, None),
+    ("family of 6 in Pangrati, no more than 250", 6, "ΠΑΓΚΡΑΤΙ", 250),
+    ("μονοκατοικία για 10 άτομα στο Θησείο", 10, "ΘΗΣΕΙΟ", None)
+]
