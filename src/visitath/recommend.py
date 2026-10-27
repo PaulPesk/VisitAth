@@ -9,10 +9,14 @@ from visitath.llm.parse import parse_request
 from visitath.rag.retrieve import search_reviews
 
 LISTINGS = Path("data/processed/listings_scored.csv")
-CANDIDATES = 10  # how many listings to check when a topic is requested
+# With a topic, check this many listings and reorder them by what their reviews say
+CANDIDATES = 10
 MIN_RATING = 4.5
 MIN_REVIEWS = 10
-MIN_VALUE, MAX_VALUE = 0.10, 0.50  # same quality band used in the notebook
+# Value-score band. Below 0.10 is not a real saving; above 0.50 is more likely a
+# misleading price (or model error) than a genuine deal. This is a choice, not a
+# measured optimum.
+MIN_VALUE, MAX_VALUE = 0.10, 0.50
 
 TOPIC_LABELS = {
     "quiet": "quiet",
@@ -73,9 +77,12 @@ def recommend(text: str, top_n: int = 3) -> list[dict]:
     for _, r in filter_and_rank(df, filters, n_fetch).iterrows():
         listing = {"price": r["price_num"], "fair_price": r["fair_price"]}
         if filters.topic is None:
+            # No topic asked, so there is nothing specific to check in the reviews
             out = explain(listing, [], "", topic=None)
             out["note"] = None
         else:
+            # Search with the topic ("quiet"), not the whole request, which also
+            # contains prices and place names
             hits = search_reviews(label, listing_id=int(r["id"]), k=5)
             out = explain(listing, hits, label, topic=filters.topic)
 
@@ -93,6 +100,7 @@ def recommend(text: str, top_n: int = 3) -> list[dict]:
         )
 
     if filters.topic:
-        # stable sort: keeps value-score order inside each group
+        # Listings with positive quotes first, then silent ones, then those with only
+        # complaints. The sort is stable, so value-score order is kept inside each group.
         results.sort(key=lambda x: review_group(x["claims"]))
     return results[:top_n]

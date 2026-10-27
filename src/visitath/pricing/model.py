@@ -16,6 +16,7 @@ NUMERIC_FEATURES = [
 ]
 CATEGORICAL_FEATURES = ["room_type", "neighbourhood_cleansed"]
 
+# n_estimators is only an upper limit: early stopping decides the real number of trees
 LGB_PARAMS = {
     "n_estimators": 2000,
     "learning_rate": 0.03,
@@ -43,10 +44,12 @@ def out_of_fold_fair_price(df: pd.DataFrame, n_splits: int = 5) -> np.ndarray:
     Folds are grouped by host to avoid leakage between a host's listings.
     """
     X = build_matrix(df)
+    # Predict log(price): prices are skewed, and errors then count as percentages
     y = np.log(df["price_num"])
     oof = np.zeros(len(df))
 
     for tr, va in GroupKFold(n_splits=n_splits).split(X, y, df["host_id"]):
+        # Early stopping watches the validation fold, so the scores are slightly optimistic
         model = lgb.LGBMRegressor(**LGB_PARAMS)
         model.fit(
             X.iloc[tr], y.iloc[tr],
@@ -54,6 +57,7 @@ def out_of_fold_fair_price(df: pd.DataFrame, n_splits: int = 5) -> np.ndarray:
             callbacks=[lgb.early_stopping(100, verbose=False)],
         )
         oof[va] = model.predict(X.iloc[va])
+    # Back from log(price) to dollars
     return np.exp(oof)
 
 
@@ -61,6 +65,8 @@ def add_value_scores(df: pd.DataFrame) -> pd.DataFrame:
     """Add fair_price and value_score columns."""
     out = df.copy()
     out["fair_price"] = out_of_fold_fair_price(out)
+    # Positive = cheaper than the model expects. Part of that gap is model error,
+    # not a real deal.
     out["value_score"] = (out["fair_price"] - out["price_num"]) / out["fair_price"]
     return out
 

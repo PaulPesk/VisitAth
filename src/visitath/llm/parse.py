@@ -13,7 +13,7 @@ class Filters(BaseModel):
     guests: int | None = Field(default=None, ge=1, le=16)
     neighbourhood: str | None = None
     max_price: float | None = Field(default=None, gt=0)
-    topic: str | None = None
+    topic: str | None = None  # one of the keys of TOPICS
 
 
 SYSTEM = """You extract search filters for an Athens apartment finder.
@@ -42,13 +42,16 @@ def parse_request(text: str, neighbourhoods: list[str]) -> Filters | None:
         filters = Filters(**json.loads(raw))
     except (ValueError, ValidationError):
         return None
+    # The LLM's output is only a suggestion: check it against the real lists
     if filters.neighbourhood not in (None, *neighbourhoods):
         filters.neighbourhood = None
     if filters.topic not in (None, *TOPICS):
         filters.topic = None
+    # A known alias ("Plaka", "Koukaki") always wins over what the LLM picked
     alias = resolve_alias(text)
     if alias in neighbourhoods:
         filters.neighbourhood = alias
+    # If the LLM found no topic, look for keywords ourselves (this helps with Greek)
     if filters.topic is None:
         filters.topic = resolve_topic(text)
     return filters

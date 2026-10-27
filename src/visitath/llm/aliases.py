@@ -2,6 +2,8 @@
 
 import unicodedata
 
+# Written by hand on purpose: a small table in code is predictable and easy to test.
+# Add more names as you meet them.
 ALIASES = {
     "plaka": "ΕΜΠΟΡΙΚΟ ΤΡΙΓΩΝΟ-ΠΛΑΚΑ",
     "πλακα": "ΕΜΠΟΡΙΚΟ ΤΡΙΓΩΝΟ-ΠΛΑΚΑ",
@@ -22,6 +24,7 @@ def normalize(text: str) -> str:
 def resolve_alias(text: str) -> str | None:
     """Return the official neighbourhood if the request mentions a known alias."""
     n = normalize(text)
+    # Plain substring match, so keep the aliases specific
     for alias, official in ALIASES.items():
         if alias in n:
             return official

@@ -19,6 +19,7 @@ def main() -> None:
     reviews = pd.read_csv(RAW)
     clean = clean_reviews(reviews, listings["id"])
     print(f"After cleaning: {len(clean)} reviews")
+    # Language detection is the slow step (10 to 20 minutes)
     english = keep_english(clean)
     print(f"English only: {len(english)} reviews for {english['listing_id'].nunique()} listings")
     OUT.parent.mkdir(parents=True, exist_ok=True)

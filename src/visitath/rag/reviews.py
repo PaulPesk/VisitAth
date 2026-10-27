@@ -2,7 +2,7 @@
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
 
-DetectorFactory.seed = 0  # επαναλήψιμα αποτελέσματα
+DetectorFactory.seed = 0  # fixed seed: language detection gives the same result every run
 import re
 
 import pandas as pd
@@ -24,6 +24,7 @@ def strip_html(text: str) -> str:
 
 
 def is_automatic(text: str) -> bool:
+    """True for the messages Airbnb posts by itself (cancellations and the like)."""
     t = text.lower()
     return any(p in t for p in AUTO_PATTERNS)
 
@@ -43,13 +44,17 @@ def clean_reviews(
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date", ascending=False)
+    # The same review id can appear twice in the export
     df = df.drop_duplicates(subset="id")
+    # Keep the newest reviews per listing: they describe the place as it is today,
+    # and it keeps the index a manageable size
     df = df.groupby("listing_id").head(max_per_listing)
     
     return df.rename(columns={"id": "review_id"})[
         ["review_id", "listing_id", "date", "comments"]
     ].reset_index(drop=True)
 def detect_lang(text: str) -> str:
+    """Language code of the text, or "unk" when it can't be detected (emoji only, etc.)."""
     try:
         return detect(text)
     except LangDetectException:

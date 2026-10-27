@@ -7,6 +7,7 @@ from sentence_transformers import SentenceTransformer
 
 from visitath.rag.index import COLLECTION, DB_PATH, MODEL_NAME
 
+# Chroma can't open the same folder from two threads at once, hence the lock
 _lock = threading.Lock()
 _state = None  # (model, collection); set only when BOTH loaded successfully
 
@@ -36,6 +37,7 @@ def search_reviews(query: str, listing_id: int | None = None, k: int = 5) -> lis
         n_results=k,
         where={"listing_id": listing_id} if listing_id is not None else None,
     )
+    # Chroma returns one result list per query; we send one query, hence the [0]s
     return [
         {"review_id": rid, "listing_id": meta["listing_id"], "text": doc, "distance": dist}
         for rid, meta, doc, dist in zip(

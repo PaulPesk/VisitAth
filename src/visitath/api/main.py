@@ -11,15 +11,19 @@ from pydantic import BaseModel, Field
 from visitath.rag.retrieve import warm_up
 from visitath.recommend import recommend
 
+# The web page (HTML, CSS, JS) lives inside the package, so it also ends up in the Docker image
 STATIC = Path(__file__).parent / "static"
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    warm_up()  # load model and index before the first request
+    # Load the embedding model and open the index once at startup,
+    # so the first search doesn't pay for it
+    warm_up()
     yield
 
 
 app = FastAPI(title="VisitAth", version="0.1.0", lifespan=lifespan)
+# CSS and JS are served from /static
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

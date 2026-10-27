@@ -4,6 +4,7 @@ const button = document.getElementById("go");
 const statusEl = document.getElementById("status");
 const resultsEl = document.getElementById("results");
 
+// Clickable examples under the search box (one is in Greek on purpose)
 const EXAMPLES = [
   "Quiet apartment for 2 in Koukaki under 120",
   "Clean studio in Exarchia up to 80",
@@ -18,6 +19,7 @@ function el(tag, text, className) {
   return node;
 }
 
+// Price line plus a bar: filled up to the listed price, with a tick at the fair price
 function priceBlock(r) {
   const wrap = el("div", undefined, "price");
   const line = el("div", undefined, "price-line");
@@ -40,7 +42,8 @@ function priceBlock(r) {
     scale.appendChild(el("span", "Fair price $" + r.fair_price.toFixed(0)));
     wrap.appendChild(scale);
 
-    // animate the bar once it is in the page
+    // Wait two frames so the browser first paints width 0; otherwise the bar jumps
+    // to its final size instead of growing
     requestAnimationFrame(() => requestAnimationFrame(() => {
       fill.style.width = (r.price_per_night / max * 100) + "%";
     }));
@@ -48,11 +51,13 @@ function priceBlock(r) {
   return wrap;
 }
 
+// Collapsible full review with the quote highlighted, so the reader can check it
 function sourceReview(c) {
   const details = el("details");
   details.appendChild(el("summary", "Show the full review"));
   const box = el("p", undefined, "source");
   const text = c.review_text;
+  // Find the quote inside the review (ignoring case) so we can highlight it
   const i = text.toLowerCase().indexOf(c.quote.toLowerCase());
   if (i >= 0) {
     box.appendChild(document.createTextNode(text.slice(0, i)));
@@ -65,6 +70,7 @@ function sourceReview(c) {
   return details;
 }
 
+// One result card. The colour follows the same 10% rule as the server's price verdict
 function renderCard(r) {
   const diff = typeof r.fair_price === "number"
     ? (r.price_per_night - r.fair_price) / r.fair_price : 0;
@@ -91,6 +97,7 @@ function renderCard(r) {
   return card;
 }
 
+// Ignore clicks while a search is running: each search makes many LLM calls
 let busy = false;
 
 async function search(text) {
@@ -107,6 +114,7 @@ async function search(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     });
+    // 429 means the server is already busy with another search
     if (res.status === 429) throw new Error("another search is still running, try again in a few seconds");
     if (!res.ok) throw new Error("the server returned " + res.status);
     const data = await res.json();

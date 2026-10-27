@@ -5,7 +5,10 @@ import json
 from visitath.llm.client import ask
 from visitath.llm.topics import quote_matches_topic
 
-MAX_DISTANCE = 0.85  # coarse safeguard only; quotes are verified in code
+# Only drops clearly unrelated reviews. Distances change a lot with how the question
+# is worded, and a tighter cutoff threw away good matches. The real check is the
+# quote verification below.
+MAX_DISTANCE = 0.85
 
 SYSTEM = """You summarise guest reviews for an Athens apartment finder.
 The guest cares about: {wishes}
@@ -27,6 +30,8 @@ def verified_claims(reviews: list[str], wishes: str, topic: str | None = None) -
         claims = json.loads(raw).get("claims", [])
     except (ValueError, AttributeError):
         return []
+    # The LLM can make quotes up, so keep a claim only if the quote really appears
+    # in the review it cites and is about the topic the guest asked for
     ok = []
     for c in claims:
         try:
@@ -58,7 +63,8 @@ def explain(listing: dict, hits: list[dict], wishes: str, topic: str | None = No
     close = [h for h in hits if h["distance"] <= MAX_DISTANCE]
     claims = verified_claims([h["text"] for h in close], wishes, topic)
     for c in claims:
-        source = close[c["review"] - 1]  # same list the LLM saw, so the index matches
+        # `close` is the same list the LLM saw, so its review number maps straight to an index
+        source = close[c["review"] - 1]
         c["review_id"] = str(source["review_id"])
         c["review_text"] = source["text"]
     return {

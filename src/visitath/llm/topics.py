@@ -3,6 +3,8 @@ import re
 
 from visitath.llm.aliases import normalize
 
+# Keywords used to check that a quote is really about the topic the guest asked for.
+# They are loose on purpose: "hot" also matches "hot water", "sleep" matches "slept great".
 TOPICS = {
     "quiet": ["quiet", "noise", "noisy", "peaceful", "loud", "silent", "sleep"],
     "bed": ["bed", "mattress", "pillow", "sheets", "sofa bed", "couch"],
@@ -21,9 +23,12 @@ def quote_matches_topic(quote: str, topic: str | None) -> bool:
     """True if the quote contains a keyword of the topic. No topic = no filtering."""
     if topic is None:
         return True
+    # Pad with a space so entries like "ac " also match when "ac" is the last word
     q = quote.lower() + " "
     return any(k in q for k in TOPICS.get(topic, []))
-# Patterns run on normalized text (lowercase, no accents), so "ήσυχο" -> "ησυχο".
+# Patterns for spotting the topic in the guest's request. They run on normalised text
+# (lowercase, no accents), so "ήσυχο" becomes "ησυχο". The \b markers stop "bed"
+# from matching inside "bedroom".
 TOPIC_PATTERNS = {
     "quiet": [r"\bquiet", r"\bnois", r"\bpeaceful", r"ησυχ", r"θορυβ"],
     "bed": [r"\bbeds?\b", r"mattress", r"κρεβατ", r"στρωμα"],

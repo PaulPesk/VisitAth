@@ -10,8 +10,9 @@ from visitath.rag.retrieve import search_reviews
 
 reviews = pd.read_csv("data/processed/reviews_clean.csv")
 counts = reviews["listing_id"].value_counts()
+# Listings with 15 to 60 reviews: enough to search in, not so many that everything matches
 pool = counts[(counts >= 15) & (counts <= 60)].index.tolist()
-random.seed(0)
+random.seed(0)  # fixed seed: the same six listings every run
 listings = random.sample(pool, 6)
 
 with open("evaluation/listing_to_label.csv", "w", newline="", encoding="utf-8") as f:

@@ -18,17 +18,20 @@ BATCH = 256
 
 def main(limit: int | None = None) -> None:
     df = pd.read_csv(REVIEWS, dtype={"review_id": "int64", "listing_id": "int64"})
+    # Chroma rejects duplicate ids inside one batch
     df = df.drop_duplicates(subset="review_id")
     if limit:
         df = df.head(limit)
 
     model = SentenceTransformer(MODEL_NAME)
     client = chromadb.PersistentClient(path=DB_PATH)
+    # Cosine distance (the embeddings are normalised)
     col = client.get_or_create_collection(COLLECTION, metadata={"hnsw:space": "cosine"})
 
     for start in range(0, len(df), BATCH):
         chunk = df.iloc[start : start + BATCH]
         emb = model.encode(chunk["comments"].tolist(), normalize_embeddings=True)
+        # upsert, so re-running after an interruption doesn't create duplicates
         col.upsert(
             ids=chunk["review_id"].astype(str).tolist(),
             embeddings=emb.tolist(),

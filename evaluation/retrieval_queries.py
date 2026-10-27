@@ -1,3 +1,5 @@
+# Questions a guest might ask about a listing. The first five are also used
+# for the per-listing test.
 QUERIES = [
     "is the apartment quiet at night?",
     "is the host helpful and responsive?",

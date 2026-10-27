@@ -4,6 +4,8 @@ import os
 
 import ollama
 
+# Both can be overridden with environment variables (inside Docker, OLLAMA_HOST
+# points at the host machine)
 MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
@@ -20,6 +22,7 @@ def ask(prompt: str, system: str | None = None, json_mode: bool = False) -> str:
         model=MODEL,
         messages=messages,
         format="json" if json_mode else None,
+        # Temperature 0 keeps answers as repeatable as possible (not a guarantee)
         options={"temperature": 0},
     )
     return response["message"]["content"]
